@@ -62,6 +62,31 @@
  * -- print info
  */
 
+const fs = require("fs");
+
+function parseInputForShapes(inputFile) {
+	/**
+	 * Checks inputFile contents if each row is in the proper format
+	 * If so, return the rows as an array of strings
+	 * Otherwise, print an error */
+	const checkValidInput = filename => {
+		const fileContents = fs
+			.readFileSync(`${__dirname}/${filename}`, "utf-8")
+			.split("\n")
+			.map(x => x.trim());
+		for (let i = 0; i < fileContents.length; i++) {
+			let row = fileContents[i];
+			if (row.split(",").length != 2) {
+				console.log("Error: Invalid input. Please check that each row of the file follows the format of: <NAME_OF_SHAPE>,<SIDE_LENGTH_RADIUS>");
+				process.exit(1);
+			}
+		}
+		return fileContents;
+	};
+
+	const rows = checkValidInput(inputFile);
+}
+
 /*---- TEST CASES ---*/
 parseInputForShapes("input1.csv");
 /* Expected output
