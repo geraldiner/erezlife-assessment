@@ -64,6 +64,76 @@
 
 const fs = require("fs");
 
+class Polygon {
+	constructor(shapeName, sideLength) {
+		this.shapeName = shapeName;
+		this.sideLength = sideLength;
+	}
+
+	perimeter() {
+		return this.numberOfSides * this.sideLength;
+	}
+
+	area() {}
+
+	print() {
+		console.log(
+			`A ${this.shapeName} with side length ${this.sideLength} u has a perimeter of ${this.perimeter()} u and an area of ${this.area()} u^2`,
+		);
+	}
+}
+
+class Triangle extends Polygon {
+	constructor(shapeName, sideLength) {
+		super(shapeName, sideLength);
+		this.numberOfSides = 3;
+	}
+
+	area() {
+		return (Math.sqrt(3) / 4) * this.sideLength ** 2;
+	}
+}
+
+class Square extends Polygon {
+	constructor(shapeName, sideLength) {
+		super(shapeName, sideLength);
+		this.numberOfSides = 4;
+	}
+
+	area() {
+		return this.sideLength * this.sideLength;
+	}
+}
+
+class Pentagon extends Polygon {
+	constructor(shapeName, sideLength) {
+		super(shapeName, sideLength);
+		this.numberOfSides = 5;
+	}
+
+	area() {
+		return 0.25 * Math.sqrt(5 * (5 + 2 * Math.sqrt(5))) * this.sideLength ** 2;
+	}
+}
+
+class Circle extends Polygon {
+	constructor(shapeName, sideLength) {
+		super(shapeName, sideLength);
+	}
+
+	perimeter() {
+		return 2 * Math.PI * this.sideLength;
+	}
+
+	area() {
+		return Math.PI * this.sideLength ** 2;
+	}
+
+	print() {
+		console.log(`A ${this.shapeName} with radius ${this.sideLength} u has a perimeter of ${this.perimeter()} u and an area of ${this.area()} u^2`);
+	}
+}
+
 function parseInputForShapes(inputFile) {
 	/**
 	 * Checks inputFile contents if each row is in the proper format
@@ -85,6 +155,28 @@ function parseInputForShapes(inputFile) {
 	};
 
 	const rows = checkValidInput(inputFile);
+	for (let row of rows) {
+		let shape;
+		const [shapeName, sideLength] = row.split(",");
+		switch (shapeName.toLowerCase()) {
+			case "triangle":
+				shape = new Triangle(shapeName, sideLength);
+				break;
+			case "square":
+				shape = new Square(shapeName, sideLength);
+				break;
+			case "pentagon":
+				shape = new Pentagon(shapeName, sideLength);
+				break;
+			case "circle":
+				shape = new Circle(shapeName, sideLength);
+				break;
+			default:
+				shape = new Polygon(shapeName, sideLength);
+				break;
+		}
+		shape.print();
+	}
 }
 
 /*---- TEST CASES ---*/
