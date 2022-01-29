@@ -147,35 +147,38 @@ function parseInputForShapes(inputFile) {
 		for (let i = 0; i < fileContents.length; i++) {
 			let row = fileContents[i];
 			if (row.split(",").length != 2) {
-				console.log("Error: Invalid input. Please check that each row of the file follows the format of: <NAME_OF_SHAPE>,<SIDE_LENGTH_RADIUS>");
-				process.exit(1);
+				return new Error("Error: Invalid input. Please check that each row of the file follows the format of: <NAME_OF_SHAPE>,<SIDE_LENGTH_RADIUS>");
 			}
 		}
 		return fileContents;
 	};
-
-	const rows = checkValidInput(inputFile);
-	for (let row of rows) {
-		let shape;
-		const [shapeName, sideLength] = row.split(",");
-		switch (shapeName.toLowerCase()) {
-			case "triangle":
-				shape = new Triangle(shapeName, sideLength);
-				break;
-			case "square":
-				shape = new Square(shapeName, sideLength);
-				break;
-			case "pentagon":
-				shape = new Pentagon(shapeName, sideLength);
-				break;
-			case "circle":
-				shape = new Circle(shapeName, sideLength);
-				break;
-			default:
-				shape = new Polygon(shapeName, sideLength);
-				break;
+	try {
+		const rows = checkValidInput(inputFile);
+		for (let row of rows) {
+			let shape;
+			const [shapeName, sideLength] = row.split(",");
+			switch (shapeName.toLowerCase()) {
+				case "triangle":
+					shape = new Triangle(shapeName, sideLength);
+					break;
+				case "square":
+					shape = new Square(shapeName, sideLength);
+					break;
+				case "pentagon":
+					shape = new Pentagon(shapeName, sideLength);
+					break;
+				case "circle":
+					shape = new Circle(shapeName, sideLength);
+					break;
+				default:
+					shape = new Polygon(shapeName, sideLength);
+					break;
+			}
+			shape.print();
 		}
-		shape.print();
+	} catch (error) {
+		console.error(error);
+		process.exit(1);
 	}
 }
 
