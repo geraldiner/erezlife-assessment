@@ -37,26 +37,47 @@
  * -- stack: ["a"]
  */
 
+function recursiveParseAndOutput(list, result = "", stack = []) {
+	if (list.length === 0) return "";
+
+	if (list.length === 1) {
+		let last = list.shift();
+		stack.push(last);
+		let lastRepeatNum = stack.indexOf(last);
+		result += `${"\t".repeat(lastRepeatNum)}<${last}>\n`;
+		while (stack.length > 0) {
+			let temp = stack.pop();
+			let tempRepeatNum = stack.length;
+			result += `${"\t".repeat(tempRepeatNum)}</${temp}>\n`;
+		}
+		return result;
+	} else {
+		let letter = list.shift();
+		stack.push(letter);
+		let repeatNum = stack.indexOf(letter);
+		result += `${"\t".repeat(repeatNum)}<${letter}>\n`;
+		return recursiveParseAndOutput(list, result, stack);
+	}
+}
+
 /*---- TEST CASES ---*/
 const input_empty = [];
 const input_single = ["a"];
 const input_two = ["a", "b"];
 const input1 = ["a", "b", "c", "d", "e", "f"];
 
-function recursiveParseAndOutput(list) {}
-
-recursiveParseAndOutput(input_empty);
+console.log(recursiveParseAndOutput(input_empty));
 /* Expected output
 (empty string)
 */
 
-recursiveParseAndOutput(input_single);
+console.log(recursiveParseAndOutput(input_single));
 /* Expected output
 <a>
 </a>
 */
 
-recursiveParseAndOutput(input_two);
+console.log(recursiveParseAndOutput(input_two));
 /* Expected output
 <a>
 	<b>
@@ -64,7 +85,7 @@ recursiveParseAndOutput(input_two);
 </a>
 */
 
-recursiveParseAndOutput(input1);
+console.log(recursiveParseAndOutput(input1));
 /* Expected output
 <a>
 	<b>
