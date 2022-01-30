@@ -22,17 +22,28 @@
  */
 
 // Get student_id and name from the two tables
+// https://www.tutorialspoint.com/sql/sql-select-query.htm
 SELECT student_id, name
   FROM student, application
   WHERE student.id = application.student_id
 
 // Counting applications
+// https://www.tutorialspoint.com/sql/sql-expressions.htm
 COUNT(score) AS number_of_apps FROM application
 
 // Sort by number_of_apps, then by name
+// https://www.tutorialspoint.com/sql/sql-order-by.htm
 ORDER BY number_of_apps DESC, name ASC
 
 // Display student with no apps as 0 ??
+// https://stackoverflow.com/questions/14793057/how-to-include-zero-0-results-in-count-aggregate
+// https://www.tutorialspoint.com/sql/sql-left-joins.htm
+// From the explanation of LEFT JOIN- will return all rows from the left table (student) even if there are no matches in the right table (application). Usually will display "NULL" but because of COUNT(), it will display 0 instead.
+// ON is what they're being matched on- the id in the student table is the same as the student_id in the application table
+SELECT student.id, name, COUNT(application.student_id) AS "number_of_apps" FROM student
+	LEFT JOIN application ON student.id = application.student_id
+GROUP BY student.id
+ORDER BY number_of_apps DESC, name ASC
 
 /* 
 student
