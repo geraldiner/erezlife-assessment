@@ -37,14 +37,28 @@
  * -- stack: ["a"]
  */
 
+/**
+ * @param: list - list of letters
+ * @param: result - string for the final output
+ * @stack: list - list of letters that have already been added to result
+ *
+ * @return: result - final string output
+ */
 function recursiveParseAndOutput(list, result = "", stack = []) {
-	if (list.length === 0) return "";
+	// If there are no letters in the list, return result, which is initialized as an empty string if not passed as an argument
+	if (list.length === 0) return result;
 
+	// Base case: 1 letter in list, start adding closing tags with n number of tabs (where n is the index of the letter in stack, eg. a is the first letter, which is added to the stack first and has an index of 0, so there should be 0 tabs on the opening and closing tags)
 	if (list.length === 1) {
+		// last letter in the list
 		let last = list.shift();
+		// add it to the current stack
 		stack.push(last);
+		// get the index of last in the stack, to be used for tabs
 		let lastRepeatNum = stack.indexOf(last);
+		// add the closing tag for the last letter in the list
 		result += `${"\t".repeat(lastRepeatNum)}<${last}>\n`;
+		// add the closing tags for the rest of the letters in the list
 		while (stack.length > 0) {
 			let temp = stack.pop();
 			let tempRepeatNum = stack.length;
@@ -52,6 +66,7 @@ function recursiveParseAndOutput(list, result = "", stack = []) {
 		}
 		return result;
 	} else {
+		// Default case: 2+ letters in the list, add the opening tag for the current letter with a certain amount of tabs, add it to the stack to keep track of all the letters so far, and call the function again with the new list, result, stack.
 		let letter = list.shift();
 		stack.push(letter);
 		let repeatNum = stack.indexOf(letter);

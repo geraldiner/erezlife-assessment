@@ -14,7 +14,7 @@
  * QUESTIONS
  * ?? Is it meant to output to the console or a file an .html file?
  * ?? What kind of error should be produced?
- * ?? Will every tag in the string be valid? ie. either be <> or </>
+ * ?? Will every tag in the string be valid? ie. either be <> or </>? Will the string every look like <html><div>a</div></html>
  */
 
 /**
