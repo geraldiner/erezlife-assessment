@@ -62,27 +62,43 @@
  * -- print info
  */
 
+// FileSystem package to work with csv files
 const fs = require("fs");
 
+// Parent Polygon class with initial constructor, methods
+// Among the four necessary shapes, perimeter is calculated the same way and the output statement uses the same wording for 3 of them (circle is oddball)
+// However, they have different area calculations, so that is specified in the child classes themselves
+// There is also a round method, which helps to round the numbers to 2 decimal places
+// -- BUG: Rounds 5.3044 to 5.3 instead of 5.30
+// ?? Is it best practice to leave a method undefined the way area() is?
 class Polygon {
 	constructor(shapeName, sideLength) {
 		this.shapeName = shapeName;
 		this.sideLength = sideLength;
 	}
 
+	// Calculates and returns the perimeter for the polygon
 	perimeter() {
-		return this.numberOfSides * this.sideLength;
+		return this.round(this.numberOfSides * this.sideLength);
 	}
 
+	// Calculates and returns the area for the polygon
 	area() {}
 
+	// Prints a statement describing the polygon and its side length, perimeter, and area
 	print() {
 		console.log(
 			`A ${this.shapeName} with side length ${this.sideLength} u has a perimeter of ${this.perimeter()} u and an area of ${this.area()} u^2`,
 		);
 	}
+
+	// Rounds and returns the given num to 2 decimal points
+	round(num) {
+		return +num.toFixed(2);
+	}
 }
 
+// Triangle class is based on the Polygon class, but the area method is defined here. On initialization, after using the parent constructor, also adds a numberOfSides property since the perimeter calculation relies on the number of sides.
 class Triangle extends Polygon {
 	constructor(shapeName, sideLength) {
 		super(shapeName, sideLength);
@@ -90,10 +106,11 @@ class Triangle extends Polygon {
 	}
 
 	area() {
-		return (Math.sqrt(3) / 4) * this.sideLength ** 2;
+		return this.round((Math.sqrt(3) / 4) * this.sideLength ** 2);
 	}
 }
 
+// Square class is based on the Polygon class, but the area method is defined here. On initialization, after using the parent constructor, also adds a numberOfSides property since the perimeter calculation relies on the number of sides.
 class Square extends Polygon {
 	constructor(shapeName, sideLength) {
 		super(shapeName, sideLength);
@@ -101,10 +118,11 @@ class Square extends Polygon {
 	}
 
 	area() {
-		return this.sideLength * this.sideLength;
+		return this.round(this.sideLength * this.sideLength);
 	}
 }
 
+// Pentagon class is based on the Polygon class, but the area method is defined here. On initialization, after using the parent constructor, also adds a numberOfSides property since the perimeter calculation relies on the number of sides.
 class Pentagon extends Polygon {
 	constructor(shapeName, sideLength) {
 		super(shapeName, sideLength);
@@ -112,21 +130,22 @@ class Pentagon extends Polygon {
 	}
 
 	area() {
-		return 0.25 * Math.sqrt(5 * (5 + 2 * Math.sqrt(5))) * this.sideLength ** 2;
+		return this.round(0.25 * Math.sqrt(5 * (5 + 2 * Math.sqrt(5))) * this.sideLength ** 2);
 	}
 }
 
+// Circle class is based on the Polygon class, but all the methods are (re)defined here.
 class Circle extends Polygon {
 	constructor(shapeName, sideLength) {
 		super(shapeName, sideLength);
 	}
 
 	perimeter() {
-		return 2 * Math.PI * this.sideLength;
+		return this.round(2 * Math.PI * this.sideLength);
 	}
 
 	area() {
-		return Math.PI * this.sideLength ** 2;
+		return this.round(Math.PI * this.sideLength ** 2);
 	}
 
 	print() {
@@ -136,49 +155,56 @@ class Circle extends Polygon {
 
 function parseInputForShapes(inputFile) {
 	/**
-	 * Checks inputFile contents if each row is in the proper format
+	 * Helper function to check if each row of the inputFile in the proper format
 	 * If so, return the rows as an array of strings
-	 * Otherwise, print an error */
+	 * Otherwise, throw an error */
 	const checkValidInput = filename => {
+		// Reads the fule, splits it by each new line (to get the rows), and trims any extra whitespace on either side. fileContents is now an array of strings (rows of the csv)
 		const fileContents = fs
 			.readFileSync(`${__dirname}/${filename}`, "utf-8")
 			.split("\n")
 			.map(x => x.trim());
+		// Goes through each row of the fileContents list to check that it is in the proper format: <NAME_OF_SHAPE>,<SIDE_LENGTH_RADIUS>
+		// Splits on the comma (csv), and the resulting array should have a length of 2
+		// If not, throw an Error
+		// ?? Should it have additional checks if the first part is a string/shape name and the second part is a number?
 		for (let i = 0; i < fileContents.length; i++) {
 			let row = fileContents[i];
 			if (row.split(",").length != 2) {
-				return new Error("Error: Invalid input. Please check that each row of the file follows the format of: <NAME_OF_SHAPE>,<SIDE_LENGTH_RADIUS>");
+				throw new Error("Error: Invalid input. Please check that each row of the file follows the format of: <NAME_OF_SHAPE>,<SIDE_LENGTH_RADIUS>");
 			}
 		}
+		// If it makes it through the for loop without the error, return fileContents
 		return fileContents;
 	};
-	try {
-		const rows = checkValidInput(inputFile);
-		for (let row of rows) {
-			let shape;
-			const [shapeName, sideLength] = row.split(",");
-			switch (shapeName.toLowerCase()) {
-				case "triangle":
-					shape = new Triangle(shapeName, sideLength);
-					break;
-				case "square":
-					shape = new Square(shapeName, sideLength);
-					break;
-				case "pentagon":
-					shape = new Pentagon(shapeName, sideLength);
-					break;
-				case "circle":
-					shape = new Circle(shapeName, sideLength);
-					break;
-				default:
-					shape = new Polygon(shapeName, sideLength);
-					break;
-			}
-			shape.print();
+	// Go through each row and split on the comma to get the info as separate pieces of info.
+	// Create a shape based on the shapeName and pass the sideLength for the constructor
+	const rows = checkValidInput(inputFile);
+	for (let row of rows) {
+		let shape;
+		// Destructure the resulting array from the split
+		const [shapeName, sideLength] = row.split(",");
+		// Switch statement based on the four types of shapes expected, use toLowerCase() just in case there's weird casing in the csv
+		switch (shapeName.toLowerCase()) {
+			case "triangle":
+				shape = new Triangle(shapeName, sideLength);
+				break;
+			case "square":
+				shape = new Square(shapeName, sideLength);
+				break;
+			case "pentagon":
+				shape = new Pentagon(shapeName, sideLength);
+				break;
+			case "circle":
+				shape = new Circle(shapeName, sideLength);
+				break;
+			default:
+				// Since the switch statement needs a default, use the Polygon parent class
+				// ?? But as mentioned above, the area method isn't defined in the Polygon parent, so what happens if something like "hexagon" is passed?
+				shape = new Polygon(shapeName, sideLength);
+				break;
 		}
-	} catch (error) {
-		console.error(error);
-		process.exit(1);
+		shape.print();
 	}
 }
 
