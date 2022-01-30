@@ -14,7 +14,7 @@
  * QUESTIONS
  * ?? Is it meant to output to the console or a file an .html file?
  * ?? What kind of error should be produced?
- * ?? Will every tag in the string be valid? ie. either be <> or </>? Will the string every look like <html><div>a</div></html>
+ * ?? Will every tag in the string be valid? ie. either be <> or </>? Will the string every look like <html><div>a</div></html>?
  */
 
 /**
@@ -32,12 +32,18 @@ const input2 = "<html><body><div></a></body></html>";
 const input3 = "<html><body><div><a></div></a>";
 
 function parseAndOutput(str) {
+	// Helper function to check if the given string is valid, ie. tags are matched
 	const checkValidInput = input => {
+		// Split on "<" to avoid accidentally losing the "/", which are needed to check if the closing tags are valid
+		// CON: Results in one empty string, so need to filter it out and put the "<" back on the string afterwards
+		// ?? Is there a better way to do this?
 		let tags = input
 			.split("<")
 			.filter(x => x !== "")
 			.map(a => "<" + a);
 
+		// Helper function to create a map of the given tags, where the opening tag is the key and the closing tag is the value - this will help in checking if the string is valid in terms of tags matching
+		// ?? Is it best practice to have a helper function in a helper function? At least in this example, I don't expect to use this function anywhere else.
 		const createPairsMap = tagsList => {
 			let map = {};
 			for (let tag of tagsList) {
@@ -47,6 +53,12 @@ function parseAndOutput(str) {
 			}
 			return map;
 		};
+
+		// Check if the string is valid
+		// Using the pairs map and a stack, go through the original list of tags
+		// If the current tag (tags[i]) has a value in pairs (pairs[tags[i]), that means it's an opening tag and add this to the stack to keep track of the open tags so far.
+		// If it doesn't, it could be a closing tag, so check that it's a closing tag for the open tag that was last seen (temp)
+		// If the current tag is not equal to the closing tag value of temp (pairs[temp]), return an Error
 		let pairs = createPairsMap(tags);
 		let stack = [];
 		for (let i = 0; i < tags.length; i++) {
@@ -55,28 +67,25 @@ function parseAndOutput(str) {
 			} else {
 				let temp = stack.pop();
 				if (tags[i] !== pairs[temp]) {
-					return new Error("Invalid input. Please check that there are no missing tags and/or the tags are not mismatched.");
+					throw new Error("Invalid input. Please check that there are no missing tags and/or the tags are not mismatched.");
 				}
 			}
 		}
+		// If it gets through the for loop, check that the stack is empty (stack.length === 0), which means all opening tags had closing tags in the right place. If so, return the keys of the pairs map (list to be used in the recursiveParseAndOutput function from 03-recursive-output).
+		// Otherwise, return an Error
 		if (stack.length === 0) {
 			return Object.keys(pairs);
 		} else {
-			return new Error("Invalid input. Please check that there are no missing tags and/or the tags are not mismatched.");
+			throw new Error("Invalid input. Please check that there are no missing tags and/or the tags are not mismatched.");
 		}
 	};
 
-	try {
-		const tags = checkValidInput(str);
-		console.log(recursiveParseAndOutput(tags));
-	} catch (error) {
-		console.error(error);
-		process.exit(1);
-	}
+	const tags = checkValidInput(str);
+	console.log(recursiveParseAndOutput(tags));
 }
 
 function recursiveParseAndOutput(list, result = "", stack = []) {
-	if (list.length === 0) return "";
+	if (list.length === 0) return result;
 
 	if (list.length === 1) {
 		let last = list.shift();
